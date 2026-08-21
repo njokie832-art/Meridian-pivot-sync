@@ -1,14 +1,14 @@
-scope_delta_content = """# Scope Delta Analysis: Event Check-in Kiosk Service Architecture Pivot
+scope_delta_content = Scope Delta Analysis: Event Check-in Kiosk Service Architecture Pivot
 
-**Project:** Solstice Events Co. – Multi-Day Tech Conference Check-In Kiosk  
-**Sprint:** Sprint 2 (The Meridian Pivot)  
-**Date:** August 2026  
-**Author:** Perpetua Gatwiri & Team  
-**Status:** Approved / Shipped  
+Project:Solstice Events Co. – Multi-Day Tech Conference Check-In Kiosk  
+Sprint: Sprint 2 (The Meridian Pivot)  
+Date: August 2026  
+Author: Esther Wachira & Team  
+Status: Approved / Shipped  
 
 ---
 
-## 1. Executive Summary & Pivot Context
+1. Executive Summary & Pivot Context
 
 On Day 4 of the 1-week industry sprint, Solstice Events Co.'s badge-printer vendor announced the immediate deprecation of their synchronous REST printing API, effective within 48 hours. The original architecture relied on synchronous HTTP execution: upon scanning an attendee's QR code, the kiosk handler issued a blocking REST request to the printer API and waited for a success code before marking the attendee as `CHECKED_IN`.
 
@@ -20,13 +20,13 @@ To maintain system operation under non-negotiable deadline constraints, the kios
 
 ---
 
-## 2. Architectural Comparison: Pre-Pivot vs. Post-Pivot
+ 2. Architectural Comparison: Pre-Pivot vs. Post-Pivot
 
-### Pre-Pivot (Day 3 Architecture: Synchronous Polling / REST)
-* **Trigger:** Kiosk UI sends synchronous `POST /checkin` with `attendee_id`.
-* **Execution:** Handler blocks execution thread while calling Vendor REST API `POST /v1/print`.
-* **State Transition:** Direct binary transition from `UNCHECKED` $\\rightarrow$ `CHECKED_IN` upon receiving HTTP 200 from vendor.
-* **Failure Modes:** High user latency, thread starvation on network delays, potential duplicate prints on request retries.Post-Pivot (Day 5 Architecture: Asynchronous Queue + Webhook)
+ Pre-Pivot (Day 3 Architecture: Synchronous Polling / REST)
+ Trigger: Kiosk UI sends synchronous `POST /checkin` with `attendee_id`.
+Execution: Handler blocks execution thread while calling Vendor REST API `POST /v1/print`.
+State Transition: Direct binary transition from `UNCHECKED` $\\rightarrow$ `CHECKED_IN` upon receiving HTTP 200 from vendor.
+ Failure Modes: High user latency, thread starvation on network delays, potential duplicate prints on request retries.Post-Pivot (Day 5 Architecture: Asynchronous Queue + Webhook)
 * **Trigger:** Kiosk UI sends `POST /api/scan` with `attendee_id`.
 * **Execution:** Handler validates status, transitions record to `PENDING`, assigns a unique `print_job_id`, publishes event payload to Message Queue (`queue_service.py`), and immediately returns HTTP 202.
 * **Callback Execution:** Badge printer processes queue item out-of-band and fires `POST /api/webhook/print-completed` upon completion.
